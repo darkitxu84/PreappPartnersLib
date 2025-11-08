@@ -1,8 +1,5 @@
-﻿using PreappPartnersLib.FileSystems;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Runtime.InteropServices;
-using System.Text;
 
 namespace PreappPartnersLib.FileSystems
 {
@@ -22,7 +19,7 @@ namespace PreappPartnersLib.FileSystems
 
         public void Dispose()
         {
-            Marshal.FreeHGlobal( (IntPtr)Ptr );
+            Marshal.FreeHGlobal((IntPtr)Ptr);
         }
     }
 }

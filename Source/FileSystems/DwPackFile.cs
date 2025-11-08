@@ -1,12 +1,11 @@
-﻿using System;
+﻿using Amicitia.IO.Binary;
+using Amicitia.IO.Streams;
+using PreappPartnersLib.Compression;
+using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using System.Threading.Tasks;
-using Amicitia.IO.Binary;
-using Amicitia.IO.Streams;
-using PreappPartnersLib.Compression;
 
 namespace PreappPartnersLib.FileSystems
 {
@@ -83,7 +82,7 @@ namespace PreappPartnersLib.FileSystems
                 entry.Flags = e.IsCompressed ? 1 : 0;
                 entry.DataOffset = dataOffset;
                 writer.Write(entry);
-                dataOffset += entry.CompressedSize;     
+                dataOffset += entry.CompressedSize;
             }
 
             for (int i = 0; i < Entries.Count; i++)
@@ -98,7 +97,7 @@ namespace PreappPartnersLib.FileSystems
             var baseStreamLock = new object();
             Parallel.ForEach(Entries, (entry =>
             {
-                if ( callback != null && !callback( entry ) ) return;
+                if (callback != null && !callback(entry)) return;
                 var unpackPath = Path.Combine(directoryPath, entry.Path);
                 var unpackDir = Path.GetDirectoryName(unpackPath);
                 Directory.CreateDirectory(unpackDir);
@@ -109,7 +108,7 @@ namespace PreappPartnersLib.FileSystems
                     // Copy compressed data from basestream so we can decompress in parallel
                     var compressedBufferMem = MemoryPool<byte>.Shared.Rent(entry.CompressedSize);
                     var compressedBuffer = compressedBufferMem.Memory.Span.Slice(0, entry.CompressedSize);
-                    lock ( baseStreamLock )
+                    lock (baseStreamLock)
                         entry.CopyTo(compressedBuffer, decompress: false);
 
                     // Decompress
@@ -126,21 +125,21 @@ namespace PreappPartnersLib.FileSystems
             }));
         }
 
-        public void AddFiles( string directoryPath, bool compress, Func<string, bool> callback )
+        public void AddFiles(string directoryPath, bool compress, Func<string, bool> callback)
         {
-            Parallel.ForEach( Directory.EnumerateFiles( directoryPath, "*", SearchOption.AllDirectories ), ( path =>
+            Parallel.ForEach(Directory.EnumerateFiles(directoryPath, "*", SearchOption.AllDirectories), (path =>
             {
-                if ( callback != null && !callback( path ) ) return;
-                var relativePath = path.Substring( path.IndexOf( directoryPath ) + directoryPath.Length + 1 );
-                Entries.Add( new DwPackFileEntry( relativePath, File.OpenRead( path ), compress ) );
+                if (callback != null && !callback(path)) return;
+                var relativePath = path.Substring(path.IndexOf(directoryPath) + directoryPath.Length + 1);
+                Entries.Add(new DwPackFileEntry(relativePath, File.OpenRead(path), compress));
             }));
         }
 
-        public static DwPackFile Pack( string directoryPath, int index, bool compress, Func<string, bool> callback )
+        public static DwPackFile Pack(string directoryPath, int index, bool compress, Func<string, bool> callback)
         {
             var pack = new DwPackFile();
             pack.Index = index;
-            pack.AddFiles( directoryPath, compress, callback );
+            pack.AddFiles(directoryPath, compress, callback);
             return pack;
         }
     }
@@ -182,12 +181,12 @@ namespace PreappPartnersLib.FileSystems
             IsCompressed = entry.Flags > 0;
         }
 
-        public Stream Open( bool decompress )
+        public Stream Open(bool decompress)
         {
             if (mDataStream == null)
             {
                 mDataStream = mBaseStream.Slice(mDataOffset, CompressedSize);
-                if ( decompress )
+                if (decompress)
                     Decompress();
             }
 
@@ -196,7 +195,7 @@ namespace PreappPartnersLib.FileSystems
 
         public void Decompress()
         {
-            if ( IsCompressed )
+            if (IsCompressed)
             {
                 mDataStream = new MemoryStream(UncompressedSize);
                 CopyTo(mDataStream, decompress: true);
@@ -205,13 +204,13 @@ namespace PreappPartnersLib.FileSystems
             }
         }
 
-        public void CopyTo( Stream destination, bool decompress )
+        public void CopyTo(Stream destination, bool decompress)
         {
-            if ( IsCompressed && decompress )
+            if (IsCompressed && decompress)
             {
                 using var inBufferMem = MemoryPool<byte>.Shared.Rent(CompressedSize);
                 var inBuffer = inBufferMem.Memory.Span.Slice(0, CompressedSize);
-                Open( false ).Read(inBufferMem.Memory.Span.Slice(0, CompressedSize));
+                Open(false).Read(inBufferMem.Memory.Span.Slice(0, CompressedSize));
 
                 using var outBufferMem = MemoryPool<byte>.Shared.Rent(UncompressedSize);
                 var outBuffer = outBufferMem.Memory.Span.Slice(0, UncompressedSize);
@@ -241,7 +240,7 @@ namespace PreappPartnersLib.FileSystems
 
         public void Compress()
         {
-            if ( !IsCompressed )
+            if (!IsCompressed)
             {
                 using var inBufferMem = MemoryPool<byte>.Shared.Rent(CompressedSize);
                 var inBuffer = inBufferMem.Memory.Span.Slice(0, CompressedSize);

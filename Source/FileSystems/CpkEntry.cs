@@ -23,7 +23,7 @@ namespace PreappPartnersLib.FileSystems
                     return EncodingCache.ShiftJIS.GetString(NativeStringHelper.AsSpan(pathBytes));
             }
             set
-            { 
+            {
                 fixed (byte* pathBytes = PathBytes)
                 {
                     Unsafe.InitBlock(pathBytes, 0, PATH_LENGTH);
