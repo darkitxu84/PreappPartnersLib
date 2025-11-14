@@ -46,7 +46,7 @@ namespace PreappPartnersLib.FileSystems
             var buffer = bufferMemory.Memory.Span.Slice(0, (int)stream.Length);
             try
             {
-                stream.Read(buffer);
+                stream.ReadExactly(buffer);
                 Read(buffer);
             }
             finally

@@ -210,7 +210,7 @@ namespace PreappPartnersLib.FileSystems
             {
                 using var inBufferMem = MemoryPool<byte>.Shared.Rent(CompressedSize);
                 var inBuffer = inBufferMem.Memory.Span.Slice(0, CompressedSize);
-                Open(false).Read(inBufferMem.Memory.Span.Slice(0, CompressedSize));
+                Open(false).ReadExactly(inBufferMem.Memory.Span.Slice(0, CompressedSize));
 
                 using var outBufferMem = MemoryPool<byte>.Shared.Rent(UncompressedSize);
                 var outBuffer = outBufferMem.Memory.Span.Slice(0, UncompressedSize);
@@ -229,12 +229,12 @@ namespace PreappPartnersLib.FileSystems
             {
                 using var inBufferMem = MemoryPool<byte>.Shared.Rent(CompressedSize);
                 var inBuffer = inBufferMem.Memory.Span.Slice(0, CompressedSize);
-                Open(false).Read(inBufferMem.Memory.Span.Slice(0, CompressedSize));
+                Open(false).ReadExactly(inBufferMem.Memory.Span.Slice(0, CompressedSize));
                 HuffmanCodec.Decompress(inBuffer, destination);
             }
             else
             {
-                Open(false).Read(destination);
+                Open(false).ReadExactly(destination);
             }
         }
 
@@ -245,7 +245,7 @@ namespace PreappPartnersLib.FileSystems
                 using var inBufferMem = MemoryPool<byte>.Shared.Rent(CompressedSize);
                 var inBuffer = inBufferMem.Memory.Span.Slice(0, CompressedSize);
                 mDataStream.Position = 0;
-                mDataStream.Read(inBufferMem.Memory.Span.Slice(0, CompressedSize));
+                mDataStream.ReadExactly(inBufferMem.Memory.Span.Slice(0, CompressedSize));
 
                 using var outBufferMem = MemoryPool<byte>.Shared.Rent(UncompressedSize);
                 var outBuffer = outBufferMem.Memory.Span.Slice(0, UncompressedSize);

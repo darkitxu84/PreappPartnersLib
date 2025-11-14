@@ -284,7 +284,6 @@ namespace PreappPartnersLib.Compression
 
         private static int WriteHuffmanData(ReadOnlySpan<byte> source, Span<byte> destination, HuffmanNode root)
         {
-            var srcOffset = 0;
             var dstOffset = 0;
             var bits = 0;
             var bitIndex = 0;
